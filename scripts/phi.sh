@@ -121,7 +121,7 @@ cards)
                 fi
                 printf '%-14s %s %s\n' "$b" "$disk" "${PHI_HOST_MEM:-6G}"
                 i=$((i + 1))
-            done < <(lspci -Dn -d 8086:225d | awk '{print $1}' | sort)
+            done < <(lspci -Dn -d 8086:225c | awk '{print $1}' | sort)
         } > "$cfg"
         echo "wrote $cfg:"; cat "$cfg"
         exit 0
@@ -326,11 +326,12 @@ vpu)
     # The AVX-512 co-processor lives in its own repository (Intel-Phi-AVX512);
     # this verb hands over. Found as the family finds a sibling:
     # PHI_AVX512_ROOT, else a checkout next to this one, else in $HOME, under
-    # its clone's name or the spaced one.
+    # its clone's name or the spaced one. The C repository first: it is where
+    # development continues; the assembly one is frozen at 3ee445c.
     avx="${PHI_AVX512_ROOT:-}"
     if [ -z "$avx" ]; then
         for base in "$root/.." "${HOME:-/nonexistent}"; do
-            for name in "Intel-Phi-AVX512" "Intel Phi AVX-512"; do
+            for name in "Intel-Phi-AVX-512-C" "Intel Phi AVX-512 C" "Intel-Phi-AVX512" "Intel Phi AVX-512"; do
                 if [ -x "$base/$name/scripts/phi-vpu.sh" ]; then
                     avx="$base/$name"
                     break 2
@@ -338,7 +339,7 @@ vpu)
             done
         done
     fi
-    [ -n "$avx" ] && [ -x "$avx/scripts/phi-vpu.sh" ] || { echo "phi: the AVX-512 co-processor is a separate repository: clone https://github.com/Lasimeri/Intel-Phi-AVX512 next to this one (or set PHI_AVX512_ROOT)" >&2; exit 1; }
+    [ -n "$avx" ] && [ -x "$avx/scripts/phi-vpu.sh" ] || { echo "phi: the AVX-512 co-processor is a separate repository: clone https://github.com/Lasimeri/Intel-Phi-AVX-512-C next to this one (or set PHI_AVX512_ROOT)" >&2; exit 1; }
     PHI_STACK_ROOT="$root" exec "$avx/scripts/phi-vpu.sh" -c "$PHI_CARD" "$@"
     ;;
 

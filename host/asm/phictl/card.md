@@ -44,4 +44,4 @@ bounds the writes in flight toward a Gen2 endpoint; an unpaced 1 MiB
 burst of 8-byte writes reset the host three times running on 2026-09-14.
 `write_paced` exposes the chunk and the read-back flag for `phictl fill`.
 Both refuse a range past the aperture; `write_card_memory` also past the
-card's 6 GiB of GDDR.
+card's 16 GiB of GDDR (the 7120A).

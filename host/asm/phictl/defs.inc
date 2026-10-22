@@ -131,7 +131,7 @@
 	.set PCI_SUBSYSTEM_VENDOR_ID, 0x2c
 	.set PCI_SUBSYSTEM_ID, 0x2e
 	.set PCI_VENDOR_INTEL, 0x8086
-	.set PCI_DEVICE_3120, 0x225d
+	.set PCI_DEVICE_7120, 0x225c
 
 # The card (host/crates/phi-regs, sources named there): BAR indexes,
 # SBOX offsets relative to SBOX_BASE inside BAR4, the POST code register
@@ -186,7 +186,9 @@
 	.set ICC_NOMINAL_DIVIDER, 20
 
 # Card memory map (phi-regs memory.rs).
-	.set GDDR_BYTES, 6 << 30
+	.set GDDR_BYTES, 16 << 30
+# How long a verb waits for the bootstrap's POST "12" after the reset at open.
+	.set READY_TIMEOUT_MS, 30000
 	.set SMPT_BASE_HI, 0x80
 	.set SMPT_PAGE_SHIFT, 34
 	.set RING_REGION_BASE, 0x10000000

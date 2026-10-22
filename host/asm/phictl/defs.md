@@ -19,7 +19,7 @@
   is a raw BAR 4 offset (0x242c, DBOX side). Every offset comes from
   `host/crates/phi-regs/src/sbox.rs`, which names its Intel source per
   register (`mic_x100.h`, the k1om `micsboxdefine.h`, `mic_dma_md.h`).
-- **Card memory**: 6 GiB of GDDR, the SMPT window at 0x80_0000_0000 with
+- **Card memory**: 16 GiB of GDDR (the 7120A), the SMPT window at 0x80_0000_0000 with
   16 GiB pages, the ring region at 256 MiB, 16 MiB
   (`host/crates/phi-regs/src/memory.rs`).
 - **The bzImage header** offsets (`Documentation/arch/x86/boot.rst`).

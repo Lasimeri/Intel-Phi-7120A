@@ -17,7 +17,7 @@
 
     "logo": {
         "type": "data",
-        "source": "$2   .--------------------------.\n$2   | $1[] [] [] [] [] [] [] []$2  |\n$2   |    .------------------.  |\n$2   |    |$3  XEON PHI 3120A  $2|  |\n$2   |    |$3  Knights Corner  $2|  |\n$2   |    |$3   57 x 4 = 228   $2|  |\n$2   |    '------------------'  |\n$2   | $1[] [] [] [] [] [] [] []$2  |\n$2   '-+----------------------+-'\n$2     $1||||||||||$2  $1||||||||||$2",
+        "source": "$2   .--------------------------.\n$2   | $1[] [] [] [] [] [] [] []$2  |\n$2   |    .------------------.  |\n$2   |    |$3  XEON PHI 7120A  $2|  |\n$2   |    |$3  Knights Corner  $2|  |\n$2   |    |$3   61 x 4 = 244   $2|  |\n$2   |    '------------------'  |\n$2   | $1[] [] [] [] [] [] [] []$2  |\n$2   '-+----------------------+-'\n$2     $1||||||||||$2  $1||||||||||$2",
         "color": { "1": "green", "2": "blue", "3": "cyan" },
         "padding": { "top": 1, "right": 3 }
     },
@@ -40,10 +40,10 @@
 
         "break",
 
-        // 57 physical cores, 4 hardware threads each. fastfetch reads the
+        // 61 physical cores on the 7120A, 4 hardware threads each. fastfetch reads the
         // count from /proc/cpuinfo, which the KNC platform layer fills from
         // the SFI CPU table.
-        { "type": "cpu",  "key": "cpu    ", "format": "Xeon Phi 3120A [{name}], {cores-physical} cores x 4 = {cores-logical} threads @ {freq-base}" },
+        { "type": "cpu",  "key": "cpu    ", "format": "Xeon Phi 7120A [{name}], {cores-physical} cores x 4 = {cores-logical} threads @ {freq-base}" },
         { "type": "custom", "key": "vector ", "format": "512-bit VPU per core, 32 zmm, MVEX encoded (not AVX-512)" },
 
         // Die temperature and the peak the SBOX has recorded since power-on.

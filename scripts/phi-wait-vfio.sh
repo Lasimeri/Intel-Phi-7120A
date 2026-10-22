@@ -20,9 +20,9 @@ timeout=${1:-60}
 bdf=${PHI_BDF:-$PHI_BDF_SEL}
 if [ -z "$bdf" ]; then
     # phictl may not be built yet on a fresh clone; fall back to the bus.
-    bdf=$(lspci -Dn -d 8086:225d 2>/dev/null | awk '{print $1}' | sed -n "$((PHI_CARD + 1))p" || true)
+    bdf=$(lspci -Dn -d 8086:225c 2>/dev/null | awk '{print $1}' | sed -n "$((PHI_CARD + 1))p" || true)
 fi
-[ -n "$bdf" ] || { echo "phi-wait-vfio.sh: card $PHI_CARD is not enumerated (8086:225d)" >&2; exit 1; }
+[ -n "$bdf" ] || { echo "phi-wait-vfio.sh: card $PHI_CARD is not enumerated (8086:225c)" >&2; exit 1; }
 
 dev="/sys/bus/pci/devices/$bdf"
 [ -d "$dev" ] || { echo "phi-wait-vfio.sh: $bdf is not a PCI device on this host" >&2; exit 1; }

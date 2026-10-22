@@ -144,7 +144,7 @@ fi
 # ------------------------------------------------------- host memory as swap
 # /dev/phiblk1 is host RAM served over the ring (kernel patch 0026, phictl
 # boot --host-mem). Volatile, so it is formatted at every boot; it extends the
-# card's 6 GB of GDDR5.
+# card's GDDR5 (6 GB on a 3120, 16 GB on the 7120A).
 swap="no host memory"
 i=0
 while [ $i -lt 3 ] && [ ! -b /dev/phiblk1 ]; do $BB sleep 1; i=$((i+1)); done

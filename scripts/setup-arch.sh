@@ -68,7 +68,7 @@ MOD
 # bind-vfio.sh after a reboot; the VFIO group node then gets the phi group
 # from the udev rule above.
 cat > /etc/modprobe.d/phi-vfio.conf <<'OPT'
-options vfio-pci ids=8086:225d
+options vfio-pci ids=8086:225d,8086:225c
 OPT
 modprobe vfio-pci
 modprobe vfio_iommu_type1
@@ -83,9 +83,9 @@ fi
 if [ -z "$(ls -A /sys/kernel/iommu_groups 2>/dev/null)" ]; then
     echo "WARNING: no IOMMU groups. Enable AMD-Vi / VT-d in firmware." >&2
 fi
-bdf=$(lspci -Dn -d 8086:225d | awk '{print $1}' | head -1 || true)
+bdf=$(lspci -Dn -d 8086:225c | awk '{print $1}' | head -1 || true)
 if [ -z "$bdf" ]; then
-    echo "WARNING: no Xeon Phi 3120 series device (8086:225d) enumerated." >&2
+    echo "WARNING: no Xeon Phi 7120 series device (8086:225c) enumerated." >&2
 else
     echo "Xeon Phi found at $bdf"
     if ! grep -q "0x0000007" "/sys/bus/pci/devices/$bdf/resource"; then

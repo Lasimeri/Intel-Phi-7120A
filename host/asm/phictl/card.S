@@ -35,7 +35,7 @@ card_open:
 9:	leaq s_e_notbound(%rip), %rsi
 	jmp fail
 STR s_vfio_pci, "vfio-pci"
-STR s_e_notphi, "not a Xeon Phi 3120 series device (vendor 8086 device 225d expected)"
+STR s_e_notphi, "not a Xeon Phi 7120 series device (vendor 8086 device 225c expected)"
 STR s_e_notbound, "the card is not bound to vfio-pci; run: sudo scripts/bind-vfio.sh"
 
 	.globl sbox_read
@@ -367,7 +367,7 @@ write_card_memory:
 	jmp write_paced
 8:	leaq s_e_gddr(%rip), %rsi
 	jmp fail
-STR s_e_gddr, "write exceeds card GDDR (6 GiB)"
+STR s_e_gddr, "write exceeds card GDDR (16 GiB)"
 
 	.globl write_paced
 # write_paced(rdi = card address, rsi = data, rdx = len, rcx = chunk,

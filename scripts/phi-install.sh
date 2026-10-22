@@ -116,8 +116,8 @@ cards_disks_create() {
     [ $n -gt 0 ] || { echo "phi-install: no disk image named: set PHI_DISK, or run the cards stage" >&2; return 1; }
 }
 
-bdf() { lspci -Dn -d 8086:225d 2>/dev/null | awk '{print $1; exit}'; }
-bdfs() { lspci -Dn -d 8086:225d 2>/dev/null | awk '{print $1}'; }
+bdf() { lspci -Dn -d 8086:225c 2>/dev/null | awk '{print $1; exit}'; }
+bdfs() { lspci -Dn -d 8086:225c 2>/dev/null | awk '{print $1}'; }
 
 check() {
     case "$1" in
@@ -247,7 +247,7 @@ cmd_install() {
     done
     echo
     echo "${green}${bold}Installed${off} in $(( $(date +%s) - start_all ))s."
-    echo "Next: ${bold}phi up${off} then ${bold}phi run nproc${off} (expect 228)."
+    echo "Next: ${bold}phi up${off} then ${bold}phi run nproc${off} (expect 244 on the 7120A)."
 }
 
 case "${1:-install}" in

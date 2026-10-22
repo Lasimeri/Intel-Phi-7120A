@@ -1272,7 +1272,7 @@ cmd_peek:
 11:	movq %rax, %r12
 	jmp 1b
 2:	call open_card
-	movl $20000, %edi
+	movl $READY_TIMEOUT_MS, %edi
 	call wait_ready
 	movq %rbx, %rdi
 	leaq peek_buf(%rip), %rsi
@@ -1310,7 +1310,7 @@ cmd_poke:
 	call opt_num
 	movq %rax, %r12
 	call open_card
-	movl $20000, %edi
+	movl $READY_TIMEOUT_MS, %edi
 	call wait_ready
 	movq %r12, peek_buf(%rip)
 	movq %rbx, %rdi
@@ -1360,7 +1360,7 @@ cmd_fill:
 	xorl %r14d, %r14d
 	jmp 1b
 3:	call open_card
-	movl $20000, %edi
+	movl $READY_TIMEOUT_MS, %edi
 	call wait_ready
 	# an address-derived pattern: byte (addr + i) ^ 0x5a
 	xorl %edi, %edi

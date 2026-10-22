@@ -3,7 +3,7 @@
 - `normalize_bdf`: `[dddd:]bb:dd.f`, hex, device at most 31, function at
   most 7, lowercased into `dddd:bb:dd.f` (the rules of
   `host/crates/phi-vfio/src/sysfs.rs`).
-- `device_exists`, `ids_of`, `is_phi` (8086:225d), `iommu_group_of` (the
+- `device_exists`, `ids_of`, `is_phi` (8086:225c, the 7120 series), `iommu_group_of` (the
   `iommu_group` link's basename), `driver_of` (the `driver` link's
   basename), `read_attr`: under `/sys/bus/pci/devices/<bdf>/`
   (`Documentation/ABI/testing/sysfs-bus-pci`).

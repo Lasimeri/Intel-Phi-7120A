@@ -1297,7 +1297,7 @@ render:
 	popq %r12
 	popq %rbx
 	ret
-STR s_h1, "phitop  Phi 3120A  up "
+STR s_h1, "phitop  Phi 7120A  up "
 STR s_h2, "  load "
 STR s_h3, " running of "
 STR s_h4, " procs  "

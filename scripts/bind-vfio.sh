@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # bind-vfio.sh: hand the Xeon Phi cards to vfio-pci, or take them back.
 # Usage: sudo scripts/bind-vfio.sh [bind|unbind] [BDF|all]
-# With no address (or "all") every 8086:225d device on the bus is done.
+# With no address (or "all") every 8086:225c device on the bus is done.
 # See bind-vfio.md.
 set -euo pipefail
 
@@ -9,12 +9,12 @@ action="${1:-bind}"
 case "$action" in bind|unbind) ;; *) echo "usage: bind-vfio.sh [bind|unbind] [BDF|all]" >&2; exit 2;; esac
 target="${2:-${PHI_BDF:-all}}"
 if [ "$target" = all ]; then
-    bdfs=$(lspci -Dn -d 8086:225d | awk '{print $1}' || true)
+    bdfs=$(lspci -Dn -d 8086:225c | awk '{print $1}' || true)
 else
     bdfs=$target
 fi
 if [ -z "$bdfs" ]; then
-    echo "bind-vfio.sh: no 8086:225d device found and no BDF given" >&2
+    echo "bind-vfio.sh: no 8086:225c device found and no BDF given" >&2
     exit 1
 fi
 if [ "$(id -u)" -ne 0 ]; then
@@ -29,6 +29,12 @@ one() {
         echo "bind-vfio.sh: $dev does not exist" >&2
         return 1
     fi
+    # Only a Phi: a slot whose card loses its link hands its address to
+    # another device (2026-10-21: 2f:00.0 became the RTX 3090 Ti).
+    case "$(cat "$dev/vendor"):$(cat "$dev/device")" in
+        0x8086:0x225c|0x8086:0x225d) ;;
+        *) echo "bind-vfio.sh: $bdf is $(cat "$dev/vendor"):$(cat "$dev/device"), not a Xeon Phi; refusing" >&2; return 1 ;;
+    esac
     if [ -L "$dev/driver" ]; then current=$(basename "$(readlink -f "$dev/driver")"); else current=none; fi
     case "$action" in
     bind)

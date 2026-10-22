@@ -11,7 +11,7 @@ Prepares an Arch Linux host. Root required. Idempotent.
 | `/etc/udev/rules.d/80-phi-vfio.rules` | `/dev/vfio/<N>` owned by `phi`, mode 0660 | Same |
 | `/etc/security/limits.d/80-phi.conf` | Unlimited memlock for `@phi` | VFIO DMA mappings pin memory (phase P6) |
 | `/etc/modules-load.d/phi-vfio.conf` | `vfio-pci`, `vfio_iommu_type1` at boot | Both modules present before anything wants them |
-| `/etc/modprobe.d/phi-vfio.conf` | `options vfio-pci ids=8086:225d` | Added 2026-09-14. vfio-pci claims the card the moment it loads, so a rebooted host needs no binding step and `bind-vfio.sh` becomes a repair tool rather than part of the routine. Read only at module load; it leaves no sysfs file (see below) |
+| `/etc/modprobe.d/phi-vfio.conf` | `options vfio-pci ids=8086:225d,8086:225c` | Added 2026-09-14. vfio-pci claims the card the moment it loads, so a rebooted host needs no binding step and `bind-vfio.sh` becomes a repair tool rather than part of the routine. Read only at module load; it leaves no sysfs file (see below) |
 
 ## What it deliberately does not do
 
@@ -39,7 +39,7 @@ Check, in this order:
 
 ```sh
 ls -l /etc/modprobe.d/phi-vfio.conf                 # must exist
-modprobe --showconfig | grep vfio_pci               # must show: options vfio_pci ids=8086:225d
+modprobe --showconfig | grep vfio_pci               # must show: options vfio_pci ids=8086:225d,8086:225c
 readlink /sys/bus/pci/devices/0000:2e:00.0/driver   # must end in vfio-pci
 ```
 

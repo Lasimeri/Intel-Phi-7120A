@@ -333,7 +333,7 @@ do_boot:
 	pushq %r12
 	pushq %r13
 	# 1. the bootstrap at "12"
-	movl $20000, %edi
+	movl $READY_TIMEOUT_MS, %edi
 	call wait_ready
 	call download_info
 	andl $0xfffff000, %eax
@@ -491,7 +491,7 @@ STR s_e_ring_dl, "the ring region overlaps the download address"
 STR s_e_ring_kernel, "the ring region overlaps the kernel or the initramfs"
 STR s_e_mmap, "mmap for the ring image failed"
 
-# ring_params: "memmap=<size>K$<base> phi.ring=<base>,<size> mem=6144M"
+# ring_params: "memmap=<size>K$<base> phi.ring=<base>,<size> mem=16384M"
 # at the cursor.
 ring_params:
 	leaq s_memmap(%rip), %rsi

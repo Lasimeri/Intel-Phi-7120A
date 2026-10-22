@@ -229,14 +229,14 @@ STR s_vendor, "/vendor"
 STR s_device, "/device"
 
 	.globl is_phi
-# is_phi(rsi = bdf) -> eax 1 when 8086:225d.
+# is_phi(rsi = bdf) -> eax 1 when 8086:225c.
 is_phi:
 	call ids_of
 	testl %edx, %edx
 	jz 1f
 	cmpl $PCI_VENDOR_INTEL, %eax
 	jne 1f
-	cmpl $PCI_DEVICE_3120, %ecx
+	cmpl $PCI_DEVICE_7120, %ecx
 	jne 1f
 	movl $1, %eax
 	ret
@@ -295,7 +295,7 @@ read_attr:
 	jmp trim
 
 	.globl find_phis
-# find_phis: every 8086:225d device, sorted, into enumd/nenum.
+# find_phis: every 8086:225c device, sorted, into enumd/nenum.
 find_phis:
 	pushq %rbx
 	pushq %r12

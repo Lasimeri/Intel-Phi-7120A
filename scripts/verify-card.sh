@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # verify-card.sh: print the PCIe state of every Xeon Phi (or the one given)
 # and exit non-zero if anything disqualifying is found. No root needed.
-#   scripts/verify-card.sh [BDF]        # default: every 8086:225d device, or $PHI_BDF
+#   scripts/verify-card.sh [BDF]        # default: every 8086:225c device, or $PHI_BDF
 # See verify-card.md.
 set -uo pipefail
 
@@ -9,10 +9,10 @@ target="${1:-${PHI_BDF:-}}"
 if [ -n "$target" ]; then
     bdfs=$target
 else
-    bdfs=$(lspci -Dn -d 8086:225d | awk '{print $1}' || true)
+    bdfs=$(lspci -Dn -d 8086:225c | awk '{print $1}' || true)
 fi
 if [ -z "$bdfs" ]; then
-    echo "FAIL: no Xeon Phi 3120 series device (8086:225d) on the PCI bus"
+    echo "FAIL: no Xeon Phi 7120 series device (8086:225c) on the PCI bus"
     exit 1
 fi
 note() { printf '%-22s %s\n' "$1" "$2"; }
@@ -24,13 +24,15 @@ verify_one() {
 
     note "device" "$bdf"
     note "ids" "$(cat "$dev/vendor"):$(cat "$dev/device") subsystem $(cat "$dev/subsystem_vendor"):$(cat "$dev/subsystem_device") rev $(cat "$dev/revision")"
-    # Subsystem IDs seen on this project's cards. Both are 3120-series
-    # boards (57 cores, 6 GB); 3608 was measured 2026-09-22 to expose an
-    # 8 GiB BAR0 where 3c98 exposes 16 GiB, and boots the same image.
+    # Subsystem IDs seen on this project's cards. 3c98 and 3608 are 3120-series
+    # boards (57 cores, 6 GB, device 225d); 3608 was measured 2026-09-22 to expose an
+    # 8 GiB BAR0 where 3c98 exposes 16 GiB. 7d99 is the 7120A (61 cores,
+    # 16 GB, device 225c; Intel x100 Specification Update, Table 2-2).
     case "$(cat "$dev/subsystem_device")" in
         0x3c98) note "sku" "3120A/3140A (linux-hardware.org decode of subsystem 3c98)";;
         0x3608) note "sku" "3120 series, subsystem 3608 (8 GiB BAR0 variant; measured 2026-09-22)";;
-        *)      note "sku" "not 3c98 or 3608; a different 3120-series SKU";;
+        0x7d99) note "sku" "7120A (Intel x100 Specification Update Table 2-2: 61 cores, 16 GB GDDR5, active cooling)";;
+        *)      note "sku" "not 3c98, 3608 or 7d99; a different x100 SKU";;
     esac
 
     # Link

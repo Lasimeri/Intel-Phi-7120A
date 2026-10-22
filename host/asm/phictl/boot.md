@@ -19,12 +19,12 @@ as a private copy-on-write map so its header can be patched):
    sized, mapped populated, pinned for the card at IOVA 4 GiB, its card
    address `0x81_0000_0000` announced in the region header before the
    boot so the card's `/dev/phihost` and `/dev/phiblk1` find it.
-2. The bootstrap at POST "12" (`wait_ready`, 20 s); the download address
+2. The bootstrap at POST "12" (`wait_ready`, READY_TIMEOUT_MS = 30 s); the download address
    from SPAD2, plausible (non-zero, at most 2 GiB).
 3. The bzImage: length, the 0xAA55 boot flag, `HdrS`, protocol at least
    2.03; `cmdline_size` (255 before 2.06).
 4. The command line: the option's, trimmed, plus (unless raw)
-   `memmap=<size>K$<base> phi.ring=<base>,<size> mem=6144M`, which
+   `memmap=<size>K$<base> phi.ring=<base>,<size> mem=16384M`, which
    reserves the region, tells the platform code where it is, and caps
    the kernel at the card's GDDR so nothing the bootstrap lists above it
    (registers, the SMPT window) is treated as RAM. Refused past

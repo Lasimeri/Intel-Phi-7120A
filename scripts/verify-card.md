@@ -4,7 +4,7 @@ Prints the PCIe state of every Xeon Phi on the bus (or the one given) and
 exits non-zero if anything disqualifying is found. No root needed.
 
 ```
-scripts/verify-card.sh          # every 8086:225d device
+scripts/verify-card.sh          # every 8086:225c device
 scripts/verify-card.sh BDF      # one
 ```
 

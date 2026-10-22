@@ -28,7 +28,7 @@ unit whose `ConditionPathExists` fails is marked *skipped*, which
 The index is turned into an address by `phictl cards --plain` (through
 `phi-env.sh`), so the unit and the daemon agree on which device card N
 is. On a fresh clone where `phictl` is not built yet it falls back to the
-Nth `8086:225d` device by address.
+Nth `8086:225c` device by address.
 
 On failure it says which of the three is missing, because each has a
 different fix: not bound (`sudo scripts/bind-vfio.sh`, then
