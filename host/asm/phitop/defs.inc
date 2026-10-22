@@ -81,7 +81,23 @@
 	.set VS_SIZE, 64
 	.set SN_VPU, SN_PROCS + SN_PROC_CAP * PR_SIZE
 	.set SN_VPU_HAVE, SN_VPU + VS_SIZE
-	.set SN_SIZE, SN_VPU_HAVE + 8
+# pwgd's stats block (Intel Phi Worldgen's card daemon, docs/shm-protocol.md):
+# the first page of the worldgen part of the window (1 GiB, its default),
+# offset 384, 128 bytes: the vpu_stats layout above (requests are
+# chunks, busy is the mean worker's, threads its workers), then "PWGD",
+# version, VPU instructions (counted by each worker on itself), whole
+# and shape-only answers. Copied when the magic is there (SN_PWG_HAVE 1).
+	.set PWG_PART, 0x40000000
+	.set PWG_OFF_STATS, 384
+	.set PWG_SIZE, 128
+	.set PWG_MAGIC, 0x44475750
+	.set PW_MAGIC, 64
+	.set PW_VPU, 72
+	.set PW_WHOLE, 80
+	.set PW_SHAPE, 88
+	.set SN_PWG, SN_VPU_HAVE + 8
+	.set SN_PWG_HAVE, SN_PWG + PWG_SIZE
+	.set SN_SIZE, SN_PWG_HAVE + 8
 # A rate entry.
 	.set RATE_NAME_LEN, 0
 	.set RATE_NAME, 4
@@ -127,7 +143,21 @@
 	.set DV_VPU_KERNEL, DV_VPU_HAVE + 64
 	.set DV_VPU_THREADS, DV_VPU_HAVE + 72
 	.set DV_VPU_REQUESTS, DV_VPU_HAVE + 80
-	.set DV_SIZE, DV_VPU_HAVE + 88
+# pwgd's rates (derive_pwg): chunks a second and the mean worker's busy
+# percent in tenths, compute and DMA time per chunk, VPU instructions a
+# second and per chunk, then the block's own counts.
+	.set DV_PWG_HAVE, DV_VPU_HAVE + 88
+	.set DV_PWG_CHUNK_TENTHS, DV_PWG_HAVE + 8
+	.set DV_PWG_BUSY_TENTHS, DV_PWG_HAVE + 16
+	.set DV_PWG_COMPUTE_NS, DV_PWG_HAVE + 24
+	.set DV_PWG_PUSH_NS, DV_PWG_HAVE + 32
+	.set DV_PWG_VPU_PER_S, DV_PWG_HAVE + 40
+	.set DV_PWG_VPU_PER_CHUNK, DV_PWG_HAVE + 48
+	.set DV_PWG_WORKERS, DV_PWG_HAVE + 56
+	.set DV_PWG_CHUNKS, DV_PWG_HAVE + 64
+	.set DV_PWG_ERRORS, DV_PWG_HAVE + 72
+	.set DV_PWG_WHOLE, DV_PWG_HAVE + 80
+	.set DV_SIZE, DV_PWG_HAVE + 88
 # The history table.
 	.set SEEN_BITS, 16
 	.set SEEN_CAP, 1 << SEEN_BITS

@@ -40,3 +40,11 @@ sizes as `{:.1} GiB` from 10 GiB, `N MiB` from 10 MiB, `N KiB`; bars
 `[###...]` with the filled part rounded. Decimals are rounded half up
 (the Rust formatting rounded to nearest even on the exact binary value,
 which differs only on exact ties).
+
+The `pwgd` line (2026-10-22) follows the `vpu` line when pwgd's stats block
+is in the window: chunks a second, workers busy, compute and DMA per chunk,
+vector unit instructions a second and per chunk, workers, and its totals.
+Measured with a 1,089-chunk pregen on card 0 (Intel Phi Worldgen, new seed
+-1787798236363661400): the busiest frame read 1163.2 chunks/s, workers busy
+15.8 %, compute 16.363 ms and DMA 0.215 ms a chunk, vector unit 1336.3 M
+instructions/s, 1.15 M a chunk.

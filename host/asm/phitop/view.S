@@ -423,6 +423,17 @@ STR s_vpu7, " on "
 STR s_vpu8, " threads   "
 STR s_vpu9, " requests, "
 STR s_vpu10, " errors since the worker started"
+STR s_pwg, "pwgd  "
+STR s_pwg1, " chunks/s, workers busy "
+STR s_pwg2, "%   a chunk: compute "
+STR s_pwg3, ", DMA "
+STR s_pwg4, " ms   vector unit "
+STR s_pwg5, " M instructions/s, "
+STR s_pwg6, " M a chunk   "
+STR s_pwg7, " workers   "
+STR s_pwg8, " chunks ("
+STR s_pwg9, " whole), "
+STR s_pwg10, " errors since pwgd started"
 
 # tmp_begin / tmp_right(edi = width): a piece built in tmp_buf, then
 # right-aligned in width at the saved cursor.
@@ -1237,6 +1248,59 @@ render:
 	leaq s_vpu10(%rip), %rsi
 	call w_cstr
 42:	call line_end
+	# line 5, pwgd: Intel Phi Worldgen's card daemon, from its stats block
+	# in the worldgen part of the window; only when the block is there
+	cmpq $0, DV_PWG_HAVE(%r13)
+	je 43f
+	call line_begin
+	leaq s_pwg(%rip), %rsi
+	call w_cstr
+	movq DV_PWG_CHUNK_TENTHS(%r13), %rdi
+	call w_tenths
+	leaq s_pwg1(%rip), %rsi
+	call w_cstr
+	movq DV_PWG_BUSY_TENTHS(%r13), %rdi
+	call w_tenths
+	leaq s_pwg2(%rip), %rsi
+	call w_cstr
+	movq DV_PWG_COMPUTE_NS(%r13), %rdi
+	call w_vpu_ms
+	leaq s_pwg3(%rip), %rsi
+	call w_cstr
+	movq DV_PWG_PUSH_NS(%r13), %rdi
+	call w_vpu_ms
+	leaq s_pwg4(%rip), %rsi
+	call w_cstr
+	movq DV_PWG_VPU_PER_S(%r13), %rdi
+	movl $1000000, %esi
+	movl $1, %edx
+	call w_fixed_r
+	leaq s_pwg5(%rip), %rsi
+	call w_cstr
+	movq DV_PWG_VPU_PER_CHUNK(%r13), %rdi
+	movl $1000000, %esi
+	movl $2, %edx
+	call w_fixed_r
+	leaq s_pwg6(%rip), %rsi
+	call w_cstr
+	movq DV_PWG_WORKERS(%r13), %rdi
+	call w_dec
+	leaq s_pwg7(%rip), %rsi
+	call w_cstr
+	movq DV_PWG_CHUNKS(%r13), %rdi
+	call w_dec
+	leaq s_pwg8(%rip), %rsi
+	call w_cstr
+	movq DV_PWG_WHOLE(%r13), %rdi
+	call w_dec
+	leaq s_pwg9(%rip), %rsi
+	call w_cstr
+	movq DV_PWG_ERRORS(%r13), %rdi
+	call w_dec
+	leaq s_pwg10(%rip), %rsi
+	call w_cstr
+	call line_end
+43:
 	# line 6: card devices
 	call line_begin
 	leaq s_card(%rip), %rsi

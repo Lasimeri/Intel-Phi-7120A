@@ -38,3 +38,10 @@ forgotten, with the probe chains after a removed entry reinserted.
 Integers throughout: what the Rust code kept as `f64` is kept here in
 the unit its display needs (loads in 1/10000, shares in tenths of a
 percent, rates in bytes per second, intervals in microseconds).
+
+`derive_pwg` (2026-10-22) does the same for pwgd's stats block (Intel Phi
+Worldgen's card daemon, its `docs/shm-protocol.md`): chunks a second, the
+mean worker's busy percent, compute and DMA time per chunk, and the vector
+unit's instructions a second and per chunk, from the VPU_INSTRUCTIONS_EXECUTED
+counts each pwgd worker takes of itself (KNC event 0x2016). A counter that
+went backwards (pwgd restarted) leaves the line out for that interval.

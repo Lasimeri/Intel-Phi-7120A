@@ -33,6 +33,7 @@ slots:	.skip MAX_SLOTS * SL_SIZE
 sockaddr:	.skip 112
 pfd1:	.skip 8
 vpu_maps:	.skip MAX_SLOTS * 8	# each slot's card window (its first page, read-only), 0 when none
+pwg_maps:	.skip MAX_SLOTS * 8	# each slot's window at the worldgen part (pwgd's stats page), 0 when none
 vpu_path:	.skip 64
 
 	.text
@@ -311,6 +312,8 @@ slot_number:
 # after) mapped read-only, its first page, for the co-processor worker's
 # stats line (defs.inc, VPU_OFF_STATS); the slot's entry of vpu_maps is
 # the mapping, or 0 when there is no window (then no vpu line).
+# The same file's page at PWG_PART goes to pwg_maps: pwgd's stats block
+# (Intel Phi Worldgen), shown as the pwgd line when its magic is there.
 slot_vpu_open:
 	pushq %rbx
 	pushq %r12
@@ -319,6 +322,8 @@ slot_vpu_open:
 	call slot_number
 	movq %rax, %r12
 	leaq vpu_maps(%rip), %rax
+	movq $0, (%rax,%r12,8)
+	leaq pwg_maps(%rip), %rax
 	movq $0, (%rax,%r12,8)
 	# the path, through the writer
 	movq wp(%rip), %r13
@@ -352,6 +357,19 @@ slot_vpu_open:
 	xorl %r9d, %r9d
 	SYS SYS_mmap
 	movq %rax, %rbx
+	# the worldgen part's first page, for pwgd's stats block
+	xorl %edi, %edi
+	movl $4096, %esi
+	movl $PROT_READ, %edx
+	movl $MAP_SHARED, %r10d
+	movq %r13, %r8
+	movl $PWG_PART, %r9d
+	SYS SYS_mmap
+	cmpq $-4096, %rax
+	jb 3f
+	xorl %eax, %eax
+3:	leaq pwg_maps(%rip), %rcx
+	movq %rax, (%rcx,%r12,8)
 	movl %r13d, %edi
 	SYS SYS_close
 	cmpq $-4096, %rbx
@@ -366,19 +384,22 @@ STR s_hostmem, "/dev/shm/phi-hostmem"
 
 # slot_vpu_sample(rdi = slot): the stats line copied into the current
 # snapshot (SN_VPU, SN_VPU_HAVE 1), or SN_VPU_HAVE 0 without a window.
+# Then pwgd's block likewise (SN_PWG, SN_PWG_HAVE) when its magic is there.
 # Eight word loads: the worker stores the line whole, and its counters
 # only grow, so a line read while it changes is at worst one request
 # off between two of its fields.
 slot_vpu_sample:
 	pushq %rbx
+	pushq %r12
 	movq %rdi, %rbx
 	call slot_number
+	movq %rax, %r12
 	leaq vpu_maps(%rip), %rcx
 	movq (%rcx,%rax,8), %rsi
 	movq SL_CUR(%rbx), %rdi
 	movq $0, SN_VPU_HAVE(%rdi)
 	testq %rsi, %rsi
-	jz 9f
+	jz 5f
 	addq $VPU_OFF_STATS, %rsi
 	movl $VS_SIZE / 8, %ecx
 1:	movq (%rsi), %rax
@@ -389,7 +410,26 @@ slot_vpu_sample:
 	jnz 1b
 	movq SL_CUR(%rbx), %rdi
 	movq $1, SN_VPU_HAVE(%rdi)
-9:	popq %rbx
+5:	leaq pwg_maps(%rip), %rcx
+	movq (%rcx,%r12,8), %rsi
+	movq SL_CUR(%rbx), %rdi
+	movq $0, SN_PWG_HAVE(%rdi)
+	testq %rsi, %rsi
+	jz 9f
+	addq $PWG_OFF_STATS, %rsi
+	cmpl $PWG_MAGIC, PW_MAGIC(%rsi)
+	jne 9f
+	movl $PWG_SIZE / 8, %ecx
+6:	movq (%rsi), %rax
+	movq %rax, SN_PWG(%rdi)
+	addq $8, %rsi
+	addq $8, %rdi
+	decl %ecx
+	jnz 6b
+	movq SL_CUR(%rbx), %rdi
+	movq $1, SN_PWG_HAVE(%rdi)
+9:	popq %r12
+	popq %rbx
 	ret
 
 # make_slots: which cards to watch. One when anything names one; else

@@ -25,3 +25,7 @@ and the record layouts of `model.S` and `main.S`:
   error text, name, address, socket path, the derived record, the
   history, two snapshots: about 6.5 MB, sixteen slots in `.bss`, paged
   in as touched.
+
+`PWG_*`, `PW_*`, `SN_PWG*` and `DV_PWG_*` (2026-10-22): pwgd's stats block in
+the worldgen part of the window (Intel Phi Worldgen) and its derived rates;
+the first 64 bytes follow `struct vpu_stats`, so the `VS_*` offsets apply.

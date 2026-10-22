@@ -47,3 +47,9 @@ the terminal is restored on every exit.
 
 Verified: `phitop --batch` frames for cards 0 and 1 against the Rust
 phitop's (`docs/results/2026-09-29-phictl-assembly.md`, phitop section).
+
+**pwgd's stats block** (2026-10-22): `slot_vpu_open` also maps, read-only, the
+window's page at `PWG_PART` (1 GiB, the worldgen part of Intel Phi Worldgen,
+whose card daemon pwgd writes there), into `pwg_maps`; `slot_vpu_sample`
+copies its 128 bytes at `PWG_OFF_STATS` into the snapshot when the magic
+`PWGD` is there, else marks it absent. Without pwgd nothing changes.

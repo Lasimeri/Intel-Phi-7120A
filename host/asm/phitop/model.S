@@ -587,6 +587,7 @@ derive:
 	incq %r15
 	jmp 13b
 16:	call derive_vpu
+	call derive_pwg
 	addq $24, %rsp
 	popq %r15
 	popq %r14
@@ -664,6 +665,81 @@ derive_vpu:
 	movq %rax, DV_VPU_PUSH_NS(%r14)
 8:	movq $1, DV_VPU_HAVE(%r14)
 9:	popq %rbx
+	ret
+
+# derive_pwg (r12 = previous snapshot, r13 = current, r14 = derived):
+# pwgd's rates over the interval from two copies of its stats block
+# (Intel Phi Worldgen, docs/shm-protocol.md): chunks a second and the mean
+# worker's busy percent in tenths, compute and DMA time per chunk, VPU
+# instructions a second and per chunk, and the block's counts.
+# DV_PWG_HAVE stays 0 without both blocks or when a counter went
+# backwards (pwgd restarted between the samples).
+derive_pwg:
+	pushq %rbx
+	pushq %r15
+	movq $0, DV_PWG_HAVE(%r14)
+	cmpq $0, SN_PWG_HAVE(%r13)
+	je 9f
+	cmpq $0, SN_PWG_HAVE(%r12)
+	je 9f
+	movq SN_PWG+VS_REQUESTS(%r13), %rbx
+	subq SN_PWG+VS_REQUESTS(%r12), %rbx	# chunks in the interval
+	jc 9f
+	movq SN_PWG+PW_VPU(%r13), %r15
+	subq SN_PWG+PW_VPU(%r12), %r15	# VPU instructions in the interval
+	jc 9f
+	movq SN_PWG+VS_REQUESTS(%r13), %rax
+	movq %rax, DV_PWG_CHUNKS(%r14)
+	movq SN_PWG+VS_ERRORS(%r13), %rax
+	movq %rax, DV_PWG_ERRORS(%r14)
+	movq SN_PWG+PW_WHOLE(%r13), %rax
+	movq %rax, DV_PWG_WHOLE(%r14)
+	movl SN_PWG+VS_LAST_THREADS(%r13), %eax
+	movq %rax, DV_PWG_WORKERS(%r14)
+	# chunks a second in tenths: n * 1e7 / interval_us
+	movq %rbx, %rax
+	imulq $10000000, %rax, %rax
+	xorl %edx, %edx
+	divq DV_INTERVAL_US(%r14)
+	movq %rax, DV_PWG_CHUNK_TENTHS(%r14)
+	# the mean worker's busy percent in tenths: busy_ns / interval_us
+	movq SN_PWG+VS_BUSY_NS(%r13), %rax
+	subq SN_PWG+VS_BUSY_NS(%r12), %rax
+	jc 9f
+	xorl %edx, %edx
+	divq DV_INTERVAL_US(%r14)
+	movq %rax, DV_PWG_BUSY_TENTHS(%r14)
+	# VPU instructions a second: n * 1e6 / interval_us
+	movq %r15, %rax
+	imulq $1000000, %rax, %rax
+	xorl %edx, %edx
+	divq DV_INTERVAL_US(%r14)
+	movq %rax, DV_PWG_VPU_PER_S(%r14)
+	# per chunk (0 without a chunk): compute, DMA, VPU instructions
+	movq $0, DV_PWG_COMPUTE_NS(%r14)
+	movq $0, DV_PWG_PUSH_NS(%r14)
+	movq $0, DV_PWG_VPU_PER_CHUNK(%r14)
+	testq %rbx, %rbx
+	jz 8f
+	movq SN_PWG+VS_COMPUTE_NS(%r13), %rax
+	subq SN_PWG+VS_COMPUTE_NS(%r12), %rax
+	jc 9f
+	xorl %edx, %edx
+	divq %rbx
+	movq %rax, DV_PWG_COMPUTE_NS(%r14)
+	movq SN_PWG+VS_PUSH_NS(%r13), %rax
+	subq SN_PWG+VS_PUSH_NS(%r12), %rax
+	jc 9f
+	xorl %edx, %edx
+	divq %rbx
+	movq %rax, DV_PWG_PUSH_NS(%r14)
+	movq %r15, %rax
+	xorl %edx, %edx
+	divq %rbx
+	movq %rax, DV_PWG_VPU_PER_CHUNK(%r14)
+8:	movq $1, DV_PWG_HAVE(%r14)
+9:	popq %r15
+	popq %rbx
 	ret
 
 # per_second(rax = a byte delta; r14 = derived) -> rax = bytes per
