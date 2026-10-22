@@ -3,6 +3,7 @@
 | Document | Contents |
 | --- | --- |
 | [reproducibility.md](reproducibility.md) | The fresh-clone walkthrough: packages, verification, binding, host tools, toolchain, kernel, initramfs, disk image, first boot, SSH, autoboot, monitoring, with durations |
+| [7120a.md](7120a.md) | This tree's card, the 7120A: IDs, cores, GDDR, measured CPU numbering and boot, what the tree changes, the images, and what still assumes the 3120A's 57 cores |
 | [hardware.md](hardware.md) | The card, the host it sits in, measured PCIe state and transfer rates, power budget; every row with its source |
 | [plan.md](plan.md) | Phased roadmap with exit criteria and the record that proves each, risk register, non-goals |
 | [howto/build-and-run.md](howto/build-and-run.md) | Compile for the card on the host or on the card, move files, run programs |

@@ -1,4 +1,15 @@
-# Intel Phi 3120A
+# Intel Phi 7120A
+
+The [Intel-Phi-3120A](https://github.com/Lasimeri/Intel-Phi-3120A) stack,
+copied at cce74b6 and adapted for one Intel Xeon Phi 7120A (Knights Corner,
+PCI `8086:225c` subsystem `7d99`, 61 cores x 4 = 244 hardware threads, 16 GB
+of GDDR5). What differs from the 3120A, what was measured on the 7120A, and
+what still assumes 57 cores: [docs/7120a.md](docs/7120a.md).
+
+The rest of this page is the 3120A stack's README, unchanged; its numbers
+were measured on 3120A cards.
+
+## The 3120A stack
 
 A from-scratch software stack for Intel Xeon Phi 3120-series coprocessors
 (Knights Corner, PCI `8086:225d`; up to 16 cards in one host, each
