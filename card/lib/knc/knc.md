@@ -134,7 +134,7 @@ and writes `phi-libknc.tar.gz` for the card, whose clang searches
 `/opt/phi/usr`:
 
 ```sh
-phi put ~/.cache/intel-phi-3120a-build/userland/libknc/phi-libknc.tar.gz /tmp/libknc.tar.gz
+phi put ~/.cache/intel-phi-7120a-build/userland/libknc/phi-libknc.tar.gz /tmp/libknc.tar.gz
 phi run sh -c 'tar -xzf /tmp/libknc.tar.gz -C /'
 ```
 

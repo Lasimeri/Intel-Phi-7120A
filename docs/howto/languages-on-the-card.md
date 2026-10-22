@@ -44,7 +44,7 @@ headers and libraries are found without flags.
 
 ```sh
 card/lib/knc/build.sh
-phi put ~/.cache/intel-phi-3120a-build/userland/libknc/phi-libknc.tar.gz /tmp/libknc.tar.gz
+phi put ~/.cache/intel-phi-7120a-build/userland/libknc/phi-libknc.tar.gz /tmp/libknc.tar.gz
 phi run sh -c 'tar -xzf /tmp/libknc.tar.gz -C /'
 phi put prog.c /tmp/prog.c
 phi run sh -c 'cd /tmp && cc -O2 -o prog prog.c -lknc && ./prog'
@@ -74,7 +74,7 @@ than a step here. The card's own agent is Rust and is built this way.
 
 ```sh
 card/lib/knc-rs/build.sh
-phi put ~/.cache/intel-phi-3120a-build/userland/knc-rs/knc-demo /tmp/knc-demo
+phi put ~/.cache/intel-phi-7120a-build/userland/knc-rs/knc-demo /tmp/knc-demo
 phi run sh -c 'chmod +x /tmp/knc-demo && /tmp/knc-demo 228 64 256'
 ```
 
@@ -99,7 +99,7 @@ const buf = knc.alloc(knc.BLOCK * 4);
 
 ```sh
 card/userland/components/quickjs.sh
-phi put ~/.cache/intel-phi-3120a-build/userland/quickjs/phi-quickjs.tar.gz /tmp/q.tar.gz
+phi put ~/.cache/intel-phi-7120a-build/userland/quickjs/phi-quickjs.tar.gz /tmp/q.tar.gz
 phi run sh -c 'tar -xzf /tmp/q.tar.gz -C /'
 phi run qjs --std /tmp/script.js
 ```
@@ -120,7 +120,7 @@ buf = knc.Buffer(knc.BLOCK * 4)
 ```sh
 PHI_PYTHON_EXTRA_SRC=card/lib/knc-py PHI_PYTHON_SETUP=card/lib/knc-py/Setup.local \
   card/userland/components/cpython.sh
-phi put ~/.cache/intel-phi-3120a-build/userland/cpython/phi-python.tar.gz /tmp/p.tar.gz
+phi put ~/.cache/intel-phi-7120a-build/userland/cpython/phi-python.tar.gz /tmp/p.tar.gz
 phi run sh -c 'tar -xzf /tmp/p.tar.gz -C /'
 phi run python3 /tmp/script.py
 ```

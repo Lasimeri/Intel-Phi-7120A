@@ -23,7 +23,7 @@ by one patched LLVM) and `docs/decisions/0007-rust-distro-rustc-patched-llvm.md`
 
 Every script sources `env.sh`, can be rerun, and audits what it produces
 with `phi-isa-audit`. Build products live under
-`~/.cache/intel-phi-3120a-build/toolchain/` (reachable as
+`~/.cache/intel-phi-7120a-build/toolchain/` (reachable as
 `toolchain/build/`). Durations are measured on a 16-thread desktop and
 recorded in `docs/results/2026-09-13-p2-*.md`; the same table with its
 result column is `docs/reproducibility.md` section 6.

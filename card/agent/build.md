@@ -8,7 +8,7 @@ no rustc, no C library. The result is about 20 KiB.
 
 Steps: assemble and link, audit with `phi-isa-audit` (`make build` first;
 the audit must be clean, and a hit fails the build), then move the binary
-to `~/.cache/intel-phi-3120a-build/userland/agent/phi-agent` (the same
+to `~/.cache/intel-phi-7120a-build/userland/agent/phi-agent` (the same
 place the Rust agent went, `card/userland/build/agent/` through the build
 symlink), from where `card/initramfs/build.sh` installs it as
 `/bin/phi-agent`. Cards run it from their next boot with that image.

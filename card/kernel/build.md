@@ -4,7 +4,7 @@ Builds the card kernel the same way on every machine:
 
 | Step | What it does |
 | --- | --- |
-| `fetch` | Shallow clone of the stable tree at the tag on the first line of `patches/SERIES` into `card/kernel/build/linux` (a symlink into `~/.cache/intel-phi-3120a-build/kernel`, see `toolchain/env.md`). |
+| `fetch` | Shallow clone of the stable tree at the tag on the first line of `patches/SERIES` into `card/kernel/build/linux` (a symlink into `~/.cache/intel-phi-7120a-build/kernel`, see `toolchain/env.md`). |
 | `patch` | `git reset --hard <tag>`, `git clean`, then `git am` of every patch in `SERIES` order, so the tree never depends on what was applied before. |
 | `configure` | `x86_64_defconfig`, then `scripts/kconfig/merge_config.sh` with `config/knc.config`, then `olddefconfig`; fails if `CONFIG_X86_KNC` is missing (patches not applied) or if any line of the fragment did not survive. |
 | `build` | `make LLVM=1 LLVM_IAS=1 CC=knc-cc ... bzImage` with `O=card/kernel/build/out`. |

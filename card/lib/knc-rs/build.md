@@ -6,7 +6,7 @@ copies it where `phi put` can reach it.
 ```sh
 card/lib/knc/build.sh          # first: this links libknc.a out of the sysroot
 card/lib/knc-rs/build.sh
-phi put ~/.cache/intel-phi-3120a-build/userland/knc-rs/knc-demo /tmp/knc-demo
+phi put ~/.cache/intel-phi-7120a-build/userland/knc-rs/knc-demo /tmp/knc-demo
 phi run sh -c 'chmod +x /tmp/knc-demo && /tmp/knc-demo 228 64 256'
 ```
 

@@ -12,7 +12,7 @@ under `/opt/phi`.
 ```sh
 card/lib/knc/build.sh                      # libknc.a into the sysroot first
 card/userland/components/quickjs.sh
-phi put ~/.cache/intel-phi-3120a-build/userland/quickjs/phi-quickjs.tar.gz /tmp/q.tar.gz
+phi put ~/.cache/intel-phi-7120a-build/userland/quickjs/phi-quickjs.tar.gz /tmp/q.tar.gz
 phi run sh -c 'tar -xzf /tmp/q.tar.gz -C /'
 phi run qjs -e 'console.log("hello")'
 ```

@@ -44,7 +44,7 @@ audited cleanly.
 
 ```sh
 card/userland/components/xz.sh
-phi put ~/.cache/intel-phi-3120a-build/userland/xz/xz /opt/phi/bin/xz
+phi put ~/.cache/intel-phi-7120a-build/userland/xz/xz /opt/phi/bin/xz
 phi run sh -c 'chmod 755 /opt/phi/bin/xz; ln -sf /opt/phi/bin/xz /usr/bin/xz'
 ```
 

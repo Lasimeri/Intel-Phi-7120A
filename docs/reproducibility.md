@@ -118,7 +118,7 @@ the card.
 
 Ordered in `toolchain/README.md`; every script sources `toolchain/env.sh`,
 can be rerun and audits what it produces with `phi-isa-audit`. Build
-products live under `~/.cache/intel-phi-3120a-build/` behind the symlinks
+products live under `~/.cache/intel-phi-7120a-build/` behind the symlinks
 `toolchain/build`, `card/kernel/build`, `card/userland/build`,
 `card/initramfs/build`.
 

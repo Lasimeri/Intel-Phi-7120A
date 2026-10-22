@@ -75,7 +75,7 @@ should be checked for both.
 
 ```sh
 card/userland/components/zstd.sh
-phi put ~/.cache/intel-phi-3120a-build/userland/zstd/zstd /opt/phi/bin/zstd
+phi put ~/.cache/intel-phi-7120a-build/userland/zstd/zstd /opt/phi/bin/zstd
 ```
 
 `init` links `/opt/phi/bin` into `/usr/bin` at boot, so it is on the

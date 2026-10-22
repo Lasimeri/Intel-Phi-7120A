@@ -1,16 +1,18 @@
 # env.sh: sourced by every toolchain and card build script.
 #
 # Two path problems are solved here, both caused by the repository living in
-# a directory whose name contains spaces ("Intel Phi 3120A"):
+# a directory whose name contains spaces ("Intel Phi 7120A"). This tree is
+# the 7120A copy of the 3120A stack; its alias and build root carry 7120a in
+# their names so that it and the 3120A checkout share neither:
 #
 # 1. Third-party build systems expand $CC, $DESTDIR and friends unquoted, so
 #    scripts hand them a space-free symlink to the repository root
-#    (~/.cache/intel-phi-3120a) instead of the real path.
+#    (~/.cache/intel-phi-7120a) instead of the real path.
 # 2. make derives CURDIR from getcwd(), which returns the real path even when
 #    entered through a symlink, so the build trees themselves must live at a
 #    space-free real location. toolchain/build, card/kernel/build,
 #    card/userland/build and card/initramfs/build are symlinks into
-#    ~/.cache/intel-phi-3120a-build/, created here on first use.
+#    ~/.cache/intel-phi-7120a-build/, created here on first use.
 #
 # Usage: . "$(dirname "$0")/../env.sh"   (sets phi_root, phi_build, PATH, CC/CXX)
 _env_here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -20,7 +22,7 @@ _cache="${XDG_CACHE_HOME:-$HOME/.cache}"
 # Space-free alias of the repository root.
 case "$_env_real" in
     *[[:space:]]*)
-        _link="$_cache/intel-phi-3120a"
+        _link="$_cache/intel-phi-7120a"
         mkdir -p "$_cache"
         if [ ! -L "$_link" ] || [ "$(readlink "$_link")" != "$_env_real" ]; then
             ln -sfn "$_env_real" "$_link"
@@ -34,7 +36,7 @@ esac
 export phi_root
 
 # Real, space-free build trees behind symlinks in the repository.
-phi_build="${PHI_BUILD_ROOT:-$_cache/intel-phi-3120a-build}"
+phi_build="${PHI_BUILD_ROOT:-$_cache/intel-phi-7120a-build}"
 export phi_build
 for _pair in "toolchain/build:toolchain" "card/kernel/build:kernel" "card/userland/build:userland" "card/initramfs/build:initramfs"; do
     _rel="$_env_real/${_pair%%:*}"; _name="${_pair##*:}"
@@ -44,7 +46,13 @@ for _pair in "toolchain/build:toolchain" "card/kernel/build:kernel" "card/userla
         (shopt -s dotglob nullglob; mv "$_rel"/* "$phi_build/$_name"/ 2>/dev/null || true)
         rmdir "$_rel"
     fi
-    [ -L "$_rel" ] || ln -sfn "$phi_build/$_name" "$_rel"
+    # A link left pointing elsewhere (a tree copied from the 3120A checkout
+    # carries links into intel-phi-3120a-build) is pointed here. Configured
+    # build directories copied from that root still name its paths; rebuild
+    # them clean (docs/7120a.md).
+    if [ ! -L "$_rel" ] || [ "$(readlink "$_rel")" != "$phi_build/$_name" ]; then
+        ln -sfn "$phi_build/$_name" "$_rel"
+    fi
 done
 
 export PHI_LLVM="${PHI_LLVM:-$phi_root/toolchain/build/llvm}"

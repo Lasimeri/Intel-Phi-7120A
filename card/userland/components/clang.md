@@ -21,7 +21,7 @@ separate squashfs image loaded on demand rather than in the base initramfs.
    clang, lld and the binutils-style tools built for the card with
    knc-cc/knc-c++ (Canadian cross, tablegen from the host build), static on
    musl and libc++, X86 only. Not installed; the binaries stay in
-   `~/.cache/intel-phi-3120a-build/toolchain/llvm-build-card/bin`.
+   `~/.cache/intel-phi-7120a-build/toolchain/llvm-build-card/bin`.
 3. `clang.sh`: packages them with the sysroot (musl headers and libraries,
    libc++, the compiler headers and compiler-rt) as `/opt/phi` in
    `card/userland/build/clang/phi-clang.tar.gz`, audits the tools, and

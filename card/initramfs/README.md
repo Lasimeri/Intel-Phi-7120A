@@ -104,7 +104,7 @@ phictl boot --kernel card/kernel/build/out/arch/x86/boot/bzImage \
   --cmdline "earlyprintk=phiring console=ttyPHI0"
 ```
 
-`card/initramfs/build` is a symlink into `~/.cache/intel-phi-3120a-build`
+`card/initramfs/build` is a symlink into `~/.cache/intel-phi-7120a-build`
 (`toolchain/env.md` explains why the build trees are not in the source
 tree).
 

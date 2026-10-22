@@ -31,7 +31,7 @@ built.
 ## Where the output goes
 
 The scripts install into the card sysroot under
-`~/.cache/intel-phi-3120a-build/` (reached as `card/userland/build`, see
+`~/.cache/intel-phi-7120a-build/` (reached as `card/userland/build`, see
 `toolchain/env.md`). Only busybox, dropbear and `phi-agent` go into the
 initramfs. clang and CPython are pushed to `/opt/phi` on the card's
 persistent disk instead, which is why the boot image stays near 1.4 MB.
