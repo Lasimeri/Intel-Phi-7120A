@@ -53,3 +53,10 @@ window's page at `PWG_PART` (1 GiB, the worldgen part of Intel Phi Worldgen,
 whose card daemon pwgd writes there), into `pwg_maps`; `slot_vpu_sample`
 copies its 128 bytes at `PWG_OFF_STATS` into the snapshot when the magic
 `PWGD` is there, else marks it absent. Without pwgd nothing changes.
+
+**An MD program's stats block** (2026-11-05): `slot_vpu_open` also maps, read-only, the
+window's page at `MD_PART` (1320 MiB, Intel-Phi-AmberMD's part, its `docs/md-stats.md`) into
+`md_maps`; `slot_vpu_sample` copies its 128 bytes into the snapshot when the magic `AMDS` is
+there and the block's sequence word was even and the same before and after the copy (up to
+three tries; the card writes the page uncached, so its stores arrive in order). Without the
+block nothing changes.

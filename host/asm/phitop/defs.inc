@@ -97,7 +97,31 @@
 	.set PW_SHAPE, 88
 	.set SN_PWG, SN_VPU_HAVE + 8
 	.set SN_PWG_HAVE, SN_PWG + PWG_SIZE
-	.set SN_SIZE, SN_PWG_HAVE + 8
+# An MD program's stats block (Intel-Phi-AmberMD: src/card/mdstat.h,
+# docs/md-stats.md): the first 128 bytes of the window's page at MD_PART
+# (1320 MiB), written by the program on the card under a sequence lock
+# (MD_SEQ odd while it changes). Copied when the magic "AMDS" is there and
+# MD_SEQ was even and the same before and after the copy (SN_MD_HAVE 1).
+	.set MD_PART, 0x52800000
+	.set MD_SIZE, 128
+	.set MD_MAGIC, 0x53444D41
+	.set MD_SEQ, 8
+	.set MD_NSTEP, 16
+	.set MD_NSTLIM, 24
+	.set MD_DT_MFS, 32
+	.set MD_NATOMS, 40
+	.set MD_THREADS, 48
+	.set MD_ETOT, 56
+	.set MD_TEMP, 64
+	.set MD_BUSY_NS, 72
+	.set MD_STEP_NS, 80
+	.set MD_STATE, 88
+	.set MD_PID, 92
+	.set MD_NAME, 96
+	.set MD_NAME_LEN, 32
+	.set SN_MD, SN_PWG_HAVE + 8
+	.set SN_MD_HAVE, SN_MD + MD_SIZE
+	.set SN_SIZE, SN_MD_HAVE + 8
 # A rate entry.
 	.set RATE_NAME_LEN, 0
 	.set RATE_NAME, 4
@@ -157,7 +181,17 @@
 	.set DV_PWG_CHUNKS, DV_PWG_HAVE + 64
 	.set DV_PWG_ERRORS, DV_PWG_HAVE + 72
 	.set DV_PWG_WHOLE, DV_PWG_HAVE + 80
-	.set DV_SIZE, DV_PWG_HAVE + 88
+# The MD program's rates (derive_md): steps a second in tenths, ns of
+# simulated time a day in hundredths, wall time per step, the team's busy
+# percent in tenths, seconds to the last step, then the block as it is.
+	.set DV_MD_HAVE, DV_PWG_HAVE + 88
+	.set DV_MD_STEPS_TENTHS, DV_MD_HAVE + 8
+	.set DV_MD_NSDAY_HUND, DV_MD_HAVE + 16
+	.set DV_MD_STEP_NS, DV_MD_HAVE + 24
+	.set DV_MD_BUSY_TENTHS, DV_MD_HAVE + 32
+	.set DV_MD_ETA_S, DV_MD_HAVE + 40
+	.set DV_MD_BLOCK, DV_MD_HAVE + 48
+	.set DV_SIZE, DV_MD_BLOCK + MD_SIZE
 # The history table.
 	.set SEEN_BITS, 16
 	.set SEEN_CAP, 1 << SEEN_BITS

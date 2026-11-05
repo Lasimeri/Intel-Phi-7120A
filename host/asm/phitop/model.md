@@ -45,3 +45,11 @@ mean worker's busy percent, compute and DMA time per chunk, and the vector
 unit's instructions a second and per chunk, from the VPU_INSTRUCTIONS_EXECUTED
 counts each pwgd worker takes of itself (KNC event 0x2016). A counter that
 went backwards (pwgd restarted) leaves the line out for that interval.
+
+`derive_md` (2026-11-05) does the same for an MD program's stats block (Intel-Phi-AmberMD,
+`docs/md-stats.md`): the block is copied whole for the view whenever there is one; from two
+blocks of the same pid with no fewer steps it derives steps a second and simulated ns a day
+(steps x the time step in 1/1000 fs x 8640 / the interval in us) over the sample interval, and,
+against the program's own clock of time inside steps, the wall time per step, the team's busy
+percent (its threads' time in parallel work over step time x threads) and the seconds the
+remaining steps take. The program's clock is used where a step can be longer than the interval.

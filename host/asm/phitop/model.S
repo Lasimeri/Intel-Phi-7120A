@@ -588,6 +588,7 @@ derive:
 	jmp 13b
 16:	call derive_vpu
 	call derive_pwg
+	call derive_md
 	addq $24, %rsp
 	popq %r15
 	popq %r14
@@ -740,6 +741,94 @@ derive_pwg:
 8:	movq $1, DV_PWG_HAVE(%r14)
 9:	popq %r15
 	popq %rbx
+	ret
+
+# derive_md (r12 = previous snapshot, r13 = current, r14 = derived): an MD
+# program's stats block (Intel-Phi-AmberMD, docs/md-stats.md). The current
+# block is copied whole for the view whenever there is one (DV_MD_HAVE 1);
+# the rates need the previous block of the same process (MD_PID) with no
+# fewer steps, else they stay 0: steps a second in tenths, simulated ns a
+# day in hundredths (steps x dt in 1/1000 fs x 8640 / interval in us),
+# wall time per step, the team's busy percent in tenths (busy ns over the
+# program's own step time x threads), and the seconds the remaining steps
+# take at the program's own time per step.
+derive_md:
+	pushq %rbx
+	movq $0, DV_MD_HAVE(%r14)
+	cmpq $0, SN_MD_HAVE(%r13)
+	je 9f
+	leaq SN_MD(%r13), %rsi
+	leaq DV_MD_BLOCK(%r14), %rdi
+	movl $MD_SIZE / 8, %ecx
+1:	movq (%rsi), %rax
+	movq %rax, (%rdi)
+	addq $8, %rsi
+	addq $8, %rdi
+	decl %ecx
+	jnz 1b
+	xorl %eax, %eax
+	movq %rax, DV_MD_STEPS_TENTHS(%r14)
+	movq %rax, DV_MD_NSDAY_HUND(%r14)
+	movq %rax, DV_MD_STEP_NS(%r14)
+	movq %rax, DV_MD_BUSY_TENTHS(%r14)
+	movq %rax, DV_MD_ETA_S(%r14)
+	movq $1, DV_MD_HAVE(%r14)
+	cmpq $0, SN_MD_HAVE(%r12)
+	je 9f
+	movl SN_MD+MD_PID(%r13), %eax
+	cmpl SN_MD+MD_PID(%r12), %eax
+	jne 9f
+	movq SN_MD+MD_NSTEP(%r13), %rbx
+	subq SN_MD+MD_NSTEP(%r12), %rbx	# steps in the interval
+	jc 9f
+	# steps a second in tenths: n * 1e7 / interval_us
+	movq %rbx, %rax
+	imulq $10000000, %rax, %rax
+	xorl %edx, %edx
+	divq DV_INTERVAL_US(%r14)
+	movq %rax, DV_MD_STEPS_TENTHS(%r14)
+	# simulated ns a day in hundredths: n * dt_mfs * 8640 / interval_us
+	movq %rbx, %rax
+	imulq SN_MD+MD_DT_MFS(%r13), %rax
+	imulq $8640, %rax, %rax
+	xorl %edx, %edx
+	divq DV_INTERVAL_US(%r14)
+	movq %rax, DV_MD_NSDAY_HUND(%r14)
+	# the team's busy percent in tenths, against the program's own step
+	# clock, not the sample interval (the block changes once a step, and a
+	# step can be longer than the interval): busy_ns * 1000 / (step_ns * threads)
+	movq SN_MD+MD_STEP_NS(%r13), %rcx
+	subq SN_MD+MD_STEP_NS(%r12), %rcx
+	jc 9f
+	imulq SN_MD+MD_THREADS(%r13), %rcx
+	testq %rcx, %rcx
+	jz 5f
+	movq SN_MD+MD_BUSY_NS(%r13), %rax
+	subq SN_MD+MD_BUSY_NS(%r12), %rax
+	jc 9f
+	imulq $1000, %rax, %rax
+	xorl %edx, %edx
+	divq %rcx
+	movq %rax, DV_MD_BUSY_TENTHS(%r14)
+5:	testq %rbx, %rbx
+	jz 9f
+	# wall time per step: step_ns / n
+	movq SN_MD+MD_STEP_NS(%r13), %rax
+	subq SN_MD+MD_STEP_NS(%r12), %rax
+	jc 9f
+	xorl %edx, %edx
+	divq %rbx
+	movq %rax, DV_MD_STEP_NS(%r14)
+	# seconds to go at the program's own time per step (stable when a step
+	# is longer than the interval): (nstlim - nstep) * ns_per_step / 1e9
+	movq SN_MD+MD_NSTLIM(%r13), %rax
+	subq SN_MD+MD_NSTEP(%r13), %rax
+	jbe 9f
+	mulq DV_MD_STEP_NS(%r14)
+	movl $1000000000, %ecx
+	divq %rcx
+	movq %rax, DV_MD_ETA_S(%r14)
+9:	popq %rbx
 	ret
 
 # per_second(rax = a byte delta; r14 = derived) -> rax = bytes per

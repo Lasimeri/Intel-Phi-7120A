@@ -29,3 +29,10 @@ and the record layouts of `model.S` and `main.S`:
 `PWG_*`, `PW_*`, `SN_PWG*` and `DV_PWG_*` (2026-10-22): pwgd's stats block in
 the worldgen part of the window (Intel Phi Worldgen) and its derived rates;
 the first 64 bytes follow `struct vpu_stats`, so the `VS_*` offsets apply.
+
+`MD_*`, `SN_MD*` and `DV_MD_*` (2026-11-05): an MD program's stats block (Intel-Phi-AmberMD,
+`src/card/mdstat.h`): 128 bytes at the start of the window's page at `MD_PART` (1320 MiB),
+magic `AMDS`, a sequence word at 8 (odd while the card writes), then steps done and requested,
+the time step in 1/1000 fs, atoms, threads, total energy in 1/1000 kcal/mol (signed),
+temperature in 1/1000 K, the team's ns in parallel work, ns inside steps, state, pid, and a
+32-byte name. `DV_MD_*` holds the derived rates and a copy of the block for the view.

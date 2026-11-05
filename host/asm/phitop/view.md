@@ -48,3 +48,11 @@ Measured with a 1,089-chunk pregen on card 0 (Intel Phi Worldgen, new seed
 -1787798236363661400): the busiest frame read 1163.2 chunks/s, workers busy
 15.8 %, compute 16.363 ms and DMA 0.215 ms a chunk, vector unit 1336.3 M
 instructions/s, 1.15 M a chunk.
+
+The two `md` lines (2026-11-05) follow the `pwgd` line when an MD program's stats block is in
+the window: the run's name, step N of M, steps a second, ns a day, ms a step, time left (`--`
+while no step finished in the interval) and the state; then the total energy in kcal/mol, the
+temperature, atoms, threads and the team's busy percent. Two lines so each fits the batch
+frame's 132 columns. Measured with Intel-Phi-AmberMD's test simulation (48,668 argon atoms,
+120 threads on card 0): 2.9 to 3.4 steps/s and 311 to 321 ms a step against the program's own
+3.05 to 3.22 steps/s, team busy 83.3 to 85.0 % against its 80.5 to 84.8 %.

@@ -34,6 +34,7 @@ sockaddr:	.skip 112
 pfd1:	.skip 8
 vpu_maps:	.skip MAX_SLOTS * 8	# each slot's card window (its first page, read-only), 0 when none
 pwg_maps:	.skip MAX_SLOTS * 8	# each slot's window at the worldgen part (pwgd's stats page), 0 when none
+md_maps:	.skip MAX_SLOTS * 8	# each slot's window at MD_PART (an MD program's stats page), 0 when none
 vpu_path:	.skip 64
 
 	.text
@@ -313,7 +314,9 @@ slot_number:
 # stats line (defs.inc, VPU_OFF_STATS); the slot's entry of vpu_maps is
 # the mapping, or 0 when there is no window (then no vpu line).
 # The same file's page at PWG_PART goes to pwg_maps: pwgd's stats block
-# (Intel Phi Worldgen), shown as the pwgd line when its magic is there.
+# (Intel Phi Worldgen), shown as the pwgd line when its magic is there,
+# and the page at MD_PART to md_maps: an MD program's stats block
+# (Intel-Phi-AmberMD), shown as the md line when its magic is there.
 slot_vpu_open:
 	pushq %rbx
 	pushq %r12
@@ -324,6 +327,8 @@ slot_vpu_open:
 	leaq vpu_maps(%rip), %rax
 	movq $0, (%rax,%r12,8)
 	leaq pwg_maps(%rip), %rax
+	movq $0, (%rax,%r12,8)
+	leaq md_maps(%rip), %rax
 	movq $0, (%rax,%r12,8)
 	# the path, through the writer
 	movq wp(%rip), %r13
@@ -370,6 +375,19 @@ slot_vpu_open:
 	xorl %eax, %eax
 3:	leaq pwg_maps(%rip), %rcx
 	movq %rax, (%rcx,%r12,8)
+	# the MD part's first page, for an MD program's stats block
+	xorl %edi, %edi
+	movl $4096, %esi
+	movl $PROT_READ, %edx
+	movl $MAP_SHARED, %r10d
+	movq %r13, %r8
+	movl $MD_PART, %r9d
+	SYS SYS_mmap
+	cmpq $-4096, %rax
+	jb 4f
+	xorl %eax, %eax
+4:	leaq md_maps(%rip), %rcx
+	movq %rax, (%rcx,%r12,8)
 	movl %r13d, %edi
 	SYS SYS_close
 	cmpq $-4096, %rbx
@@ -388,6 +406,10 @@ STR s_hostmem, "/dev/shm/phi-hostmem"
 # Eight word loads: the worker stores the line whole, and its counters
 # only grow, so a line read while it changes is at worst one request
 # off between two of its fields.
+# Then the MD block (SN_MD, SN_MD_HAVE) under its sequence lock: copied
+# only between two equal, even reads of MD_SEQ, up to three tries; the
+# writer's stores arrive in program order (uncached on the card), so an
+# equal even sequence means a whole block.
 slot_vpu_sample:
 	pushq %rbx
 	pushq %r12
@@ -415,10 +437,10 @@ slot_vpu_sample:
 	movq SL_CUR(%rbx), %rdi
 	movq $0, SN_PWG_HAVE(%rdi)
 	testq %rsi, %rsi
-	jz 9f
+	jz 7f
 	addq $PWG_OFF_STATS, %rsi
 	cmpl $PWG_MAGIC, PW_MAGIC(%rsi)
-	jne 9f
+	jne 7f
 	movl $PWG_SIZE / 8, %ecx
 6:	movq (%rsi), %rax
 	movq %rax, SN_PWG(%rdi)
@@ -428,6 +450,35 @@ slot_vpu_sample:
 	jnz 6b
 	movq SL_CUR(%rbx), %rdi
 	movq $1, SN_PWG_HAVE(%rdi)
+7:	leaq md_maps(%rip), %rcx
+	movq (%rcx,%r12,8), %rsi
+	movq SL_CUR(%rbx), %rdi
+	movq $0, SN_MD_HAVE(%rdi)
+	testq %rsi, %rsi
+	jz 9f
+	cmpl $MD_MAGIC, (%rsi)
+	jne 9f
+	movl $3, %r8d			# tries
+10:	movq MD_SEQ(%rsi), %r9		# the sequence before the copy
+	testq $1, %r9
+	jnz 12f
+	movq SL_CUR(%rbx), %rdi
+	leaq SN_MD(%rdi), %rdi
+	movq %rsi, %r10
+	movl $MD_SIZE / 8, %ecx
+11:	movq (%r10), %rax
+	movq %rax, (%rdi)
+	addq $8, %r10
+	addq $8, %rdi
+	decl %ecx
+	jnz 11b
+	cmpq MD_SEQ(%rsi), %r9		# unchanged after it: a whole block
+	jne 12f
+	movq SL_CUR(%rbx), %rdi
+	movq $1, SN_MD_HAVE(%rdi)
+	jmp 9f
+12:	decl %r8d
+	jnz 10b
 9:	popq %r12
 	popq %rbx
 	ret

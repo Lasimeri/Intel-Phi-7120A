@@ -434,6 +434,25 @@ STR s_pwg7, " workers   "
 STR s_pwg8, " chunks ("
 STR s_pwg9, " whole), "
 STR s_pwg10, " errors since pwgd started"
+STR s_md, "md    "
+STR s_md1, "  step "
+STR s_md2, " of "
+STR s_md3, "   "
+STR s_md4, " steps/s  "
+STR s_md5, " ns/day  "
+STR s_md6, " ms/step  left "
+STR s_md7, "      E "
+STR s_md8, " kcal/mol  T "
+STR s_md9, " K   "
+STR s_md10, " atoms, "
+STR s_md11, " threads, team busy "
+STR s_md12, "%"
+STR s_md_unknown, "--"
+STR s_md_setup, "  setting up"
+STR s_md_running, "  running"
+STR s_md_done, "  done"
+STR s_md_failed, "  failed"
+STR s_md_stopped, "  stopped by the host"
 
 # tmp_begin / tmp_right(edi = width): a piece built in tmp_buf, then
 # right-aligned in width at the saved cursor.
@@ -1301,6 +1320,112 @@ render:
 	call w_cstr
 	call line_end
 43:
+	# lines 5b and 5c, md: an MD program's stats block (Intel-Phi-AmberMD)
+	# at MD_PART of the window, two lines so each fits 132 columns:
+	# progress and speed, then the physics and the team; only when the
+	# block is there
+	cmpq $0, DV_MD_HAVE(%r13)
+	je 44f
+	call line_begin
+	leaq s_md(%rip), %rsi
+	call w_cstr
+	# the run's name, up to its NUL (rbx saved: render keeps the slot in it)
+	pushq %rbx
+	xorl %ebx, %ebx
+45:	cmpl $MD_NAME_LEN, %ebx
+	jae 46f
+	movzbl DV_MD_BLOCK+MD_NAME(%r13,%rbx), %edi
+	testl %edi, %edi
+	jz 46f
+	call w_byte
+	incl %ebx
+	jmp 45b
+46:	popq %rbx
+	leaq s_md1(%rip), %rsi
+	call w_cstr
+	movq DV_MD_BLOCK+MD_NSTEP(%r13), %rdi
+	call w_dec
+	leaq s_md2(%rip), %rsi
+	call w_cstr
+	movq DV_MD_BLOCK+MD_NSTLIM(%r13), %rdi
+	call w_dec
+	leaq s_md3(%rip), %rsi
+	call w_cstr
+	movq DV_MD_STEPS_TENTHS(%r13), %rdi
+	call w_tenths
+	leaq s_md4(%rip), %rsi
+	call w_cstr
+	movq DV_MD_NSDAY_HUND(%r13), %rdi
+	movl $100, %esi
+	movl $2, %edx
+	call w_fixed
+	leaq s_md5(%rip), %rsi
+	call w_cstr
+	movq DV_MD_STEP_NS(%r13), %rdi
+	call w_vpu_ms
+	leaq s_md6(%rip), %rsi
+	call w_cstr
+	movq DV_MD_ETA_S(%r13), %rdi
+	testq %rdi, %rdi
+	jnz 49f
+	leaq s_md_unknown(%rip), %rsi
+	call w_cstr
+	jmp 50f
+49:	imulq $1000, %rdi, %rdi
+	call w_hms
+50:
+	movl DV_MD_BLOCK+MD_STATE(%r13), %eax
+	leaq s_md_setup(%rip), %rsi
+	cmpl $1, %eax
+	jb 48f
+	leaq s_md_running(%rip), %rsi
+	je 48f
+	leaq s_md_done(%rip), %rsi
+	cmpl $2, %eax
+	je 48f
+	leaq s_md_failed(%rip), %rsi
+	cmpl $3, %eax
+	je 48f
+	leaq s_md_stopped(%rip), %rsi
+48:	call w_cstr
+	call line_end
+	call line_begin
+	leaq s_md7(%rip), %rsi
+	call w_cstr
+	# total energy, signed, in 1/1000 kcal/mol
+	movq DV_MD_BLOCK+MD_ETOT(%r13), %rdi
+	testq %rdi, %rdi
+	jns 47f
+	pushq %rdi
+	movb $'-', %dil
+	call w_byte
+	popq %rdi
+	negq %rdi
+47:	movl $1000, %esi
+	movl $3, %edx
+	call w_fixed
+	leaq s_md8(%rip), %rsi
+	call w_cstr
+	movq DV_MD_BLOCK+MD_TEMP(%r13), %rdi
+	movl $1000, %esi
+	movl $2, %edx
+	call w_fixed_r
+	leaq s_md9(%rip), %rsi
+	call w_cstr
+	movq DV_MD_BLOCK+MD_NATOMS(%r13), %rdi
+	call w_dec
+	leaq s_md10(%rip), %rsi
+	call w_cstr
+	movq DV_MD_BLOCK+MD_THREADS(%r13), %rdi
+	call w_dec
+	leaq s_md11(%rip), %rsi
+	call w_cstr
+	movq DV_MD_BUSY_TENTHS(%r13), %rdi
+	call w_tenths
+	leaq s_md12(%rip), %rsi
+	call w_cstr
+	call line_end
+44:
 	# line 6: card devices
 	call line_begin
 	leaq s_card(%rip), %rsi
